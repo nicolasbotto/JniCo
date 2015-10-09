@@ -75,7 +75,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\nico\Documents\Visual Studio 2013\Projects\Router\RouterSDK\bin\Debug;C:\Program Files\Java\jdk1.7.0_67\include\win32;C:\Program Files\Java\jdk1.7.0_67\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\nico\Documents\Visual Studio 2013\Projects\JniCo\Org.Mule.Api.Routing\bin\Debug;C:\Users\nico\Documents\Visual Studio 2013\Projects\Router\RouterSDK\bin\Debug;C:\Program Files\Java\jdk1.7.0_67\include\win32;C:\Program Files\Java\jdk1.7.0_67\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -132,6 +132,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Reference Include="Org.Mule.Api">
+      <HintPath>..\Org.Mule.Api.Routing\bin\Debug\Org.Mule.Api.dll</HintPath>
+    </Reference>
+    <Reference Include="Org.Mule.Api.Routing">
+      <HintPath>..\Org.Mule.Api.Routing\bin\Debug\Org.Mule.Api.Routing.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />

@@ -11,6 +11,7 @@ using namespace System::Collections::Generic;
 class JniManager
 {
 private:
+	TypeConverter* typeConverter;
 	JavaVM* jvm;
 	JNIEnv* env;
 	jmethodID getAssemblyName;
@@ -27,14 +28,7 @@ private:
 	jmethodID getInboundProperties;
 	jmethodID responseCtor;
 	jmethodID setPayloadMethod;
-	jmethodID size;
-	jmethodID keySet;
-	jmethodID getMapValue;
-	jmethodID toArray;
 	jclass responseClazz;
-	jclass mapClazz;
-	jclass setClazz;
-	TypeConverter* typeConverter;
 
 public:
 
@@ -45,8 +39,7 @@ public:
 	JavaVM* getJVM();
 	JNIEnv* getEnv();
 	array<int>^ toIntArray(jintArray);
-	RouterSDK::ProcessRequest^ toProcessRequest(jobject);
+	Org::Mule::Api::Routing::ProcessRequest^ toProcessRequest(jobject);
 	jobject toResponseObject(String^);
-	Dictionary<String^, Object^>^ toDictionary(jobject);
 	void cleanup();
 };

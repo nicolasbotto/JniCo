@@ -43,6 +43,53 @@ TypeConverter::TypeConverter(JNIEnv* jniEnv)
 	jclass clazz = env->FindClass("Ljava/lang/Class;");
 	getClassName = env->GetMethodID(clazz, "getName", "()Ljava/lang/String;");
 	env->DeleteLocalRef(clazz);
+
+	// java/util/Map
+	jclass mapClazzTmp = env->FindClass("Ljava/util/Map;");
+
+	if (mapClazzTmp == NULL)
+	{
+		Console::WriteLine("Cannot find class java/util/Map");
+		return;
+	}
+
+	mapClazz = (jclass)env->NewGlobalRef(mapClazzTmp);
+	env->DeleteLocalRef(mapClazzTmp);
+
+	size = env->GetMethodID(mapClazz, "size", "()I");
+
+	if (size == NULL)
+	{
+		Console::WriteLine("Cannot find class java/util/Map size method");
+		return;
+	}
+
+	getMapValue = env->GetMethodID(mapClazz, "get", "(Ljava/lang/Object;)Ljava/lang/Object;");
+
+	if (getMapValue == NULL)
+	{
+		Console::WriteLine("Cannot find class java/util/Map get method");
+	}
+
+	keySet = env->GetMethodID(mapClazz, "keySet", "()Ljava/util/Set;");
+
+	if (keySet == NULL)
+	{
+		Console::WriteLine("Cannot find class java/util/Map keySet method");
+	}
+
+	// java/util/Set
+	jclass setClazzTmp = env->FindClass("Ljava/util/Set;");
+
+	if (setClazzTmp == NULL)
+	{
+		Console::WriteLine("Cannot find class java/util/Set");
+	}
+
+	setClazz = (jclass)env->NewGlobalRef(setClazzTmp);
+	env->DeleteLocalRef(setClazzTmp);
+
+	toArray = env->GetMethodID(setClazz, "toArray", "()[Ljava/lang/Object;");
 }
 
 template<>
@@ -54,7 +101,7 @@ const char* TypeConverter::convertToC(jobject obj)
 		return nullptr;
 	}
 
-	const char * c_input = env->GetStringUTFChars(input, false);
+	const char * c_input = env->GetStringUTFChars(input, 0);
 	env->ReleaseStringUTFChars(input, c_input);
 
 	return c_input;
@@ -63,7 +110,20 @@ const char* TypeConverter::convertToC(jobject obj)
 template<>
 String^ TypeConverter::convertToC(jobject obj)
 {
-	return gcnew String(convertToC<const char*>(obj));
+	//return gcnew String(convertToC<const char*>(obj));
+	jstring input = (jstring)obj;
+	if (input == NULL)
+	{
+		return nullptr;
+	}
+
+	const char * c_input = env->GetStringUTFChars(input, 0);
+
+	String^ result = gcnew String(c_input);
+
+	env->ReleaseStringUTFChars(input, c_input);
+
+	return result;
 }
 
 template<>
@@ -114,6 +174,40 @@ bool TypeConverter::convertToC(jobject obj)
 	return env->CallBooleanMethod(obj, booleanValue);
 }
 
+template<>
+Dictionary<String^, Object^>^ TypeConverter::convertToC(jobject map)
+{
+	Dictionary<String^, Object^>^ result = gcnew Dictionary<String^, Object^>();
+
+	if (map == NULL)
+	{
+		return result;
+	}
+
+	int mapSize = env->CallIntMethod(map, size);
+
+	jobject keys = env->CallObjectMethod(map, keySet);
+
+	jobjectArray arrayOfKeys = (jobjectArray)env->CallObjectMethod(keys, toArray);
+
+	for (int i = 0; i < mapSize; i++)
+	{
+		jstring keyName = (jstring)env->GetObjectArrayElement(arrayOfKeys, i);
+		jobject mapValue = env->CallObjectMethod(map, getMapValue, keyName);
+
+		if (env->IsInstanceOf(mapValue, mapClazz))
+		{
+			result->Add(convertToC<String^>(keyName), convertToC<Dictionary<String^, Object^>^>(mapValue));
+		}
+		else
+		{
+			result->Add(convertToC<String^>(keyName), toManagedObject(mapValue));
+		}
+	}
+
+	return result;
+}
+
 Object^ TypeConverter::toManagedObject(jobject obj)
 {
 	jclass clazz = env->GetObjectClass(obj);
@@ -162,4 +256,22 @@ Object^ TypeConverter::toManagedObject(jobject obj)
 	}
 
 	return nullptr;
+}
+
+void TypeConverter::cleanup()
+{
+	try
+	{
+		env->DeleteGlobalRef(mapClazz);
+		env->DeleteGlobalRef(setClazz);
+
+		/*if (env->ExceptionCheck())
+		{
+		env->ExceptionOccurred();
+		}*/
+	}
+	catch (Exception^ ex)
+	{
+		Console::WriteLine(ex->Message);
+	}
 }

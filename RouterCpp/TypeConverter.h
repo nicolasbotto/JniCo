@@ -19,6 +19,12 @@ private:
 	jmethodID longValue;
 	jmethodID booleanValue;
 	jmethodID getClassName;
+	jmethodID size;
+	jmethodID keySet;
+	jmethodID getMapValue;
+	jmethodID toArray;
+	jclass mapClazz;
+	jclass setClazz;
 
 public:
 	TypeConverter(JNIEnv*);
@@ -26,6 +32,6 @@ public:
 	// conversion functions
 	template<typename TOut>
 	TOut convertToC(jobject);
-
 	Object^ toManagedObject(jobject);
+	void cleanup();
 };

@@ -40,11 +40,11 @@ JNIEXPORT jobject JNICALL Java_jni_Router_InvokeNetMethod
 {
 	try
 	{
-		RouterSDK::ProcessRequest^ processRequest = jniManager->toProcessRequest(request);
-
+		Org::Mule::Api::Routing::ProcessRequest^ processRequest = jniManager->toProcessRequest(request);
+		Org::Mule::Api::Routing::Router^ router = gcnew Org::Mule::Api::Routing::Router();
 		try
 		{
-			Assembly^ myAss = Assembly::LoadFrom("C:\\Users\\nico\\Documents\\visual studio 2013\\Projects\\Router\\RouterSharp\\bin\\Debug\\RouterSharp.dll");
+			/*Assembly^ myAss = Assembly::LoadFrom("C:\\Users\\nico\\Documents\\visual studio 2013\\Projects\\Router\\RouterSharp\\bin\\Debug\\RouterSharp.dll");
 			Type^ myType = myAss->GetType("RouterSharp.Router");
 
 			MethodInfo^ myMethod = myType->GetMethod("ExecuteMethod");
@@ -52,10 +52,13 @@ JNIEXPORT jobject JNICALL Java_jni_Router_InvokeNetMethod
 			array< Object^ >^ local = gcnew array< Object^ >(1);
 			local[0] = processRequest;
 			
-			Object^ result = myMethod->Invoke(instance, local);
+			Object^ result = myMethod->Invoke(instance, local);*/
 			//System::Console::WriteLine(result->ToString());
 
-			jobject responseInstance = jniManager->toResponseObject(result->ToString());
+			Org::Mule::Api::Routing::ProcessRequest^ result = (Org::Mule::Api::Routing::ProcessRequest^)router->Process(processRequest);
+			
+			
+			jobject responseInstance = jniManager->toResponseObject(result->Result->ToString());
 
 			return responseInstance;
 		}

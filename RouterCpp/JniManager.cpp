@@ -21,53 +21,6 @@ void JniManager::init()
 
 	typeConverter = new TypeConverter(env);
 
-	// java/util/Map
-	jclass mapClazzTmp = env->FindClass("Ljava/util/Map;");
-
-	if (mapClazzTmp == NULL)
-	{
-		Console::WriteLine("Cannot find class java/util/Map");
-		return;
-	}
-
-	mapClazz = (jclass)env->NewGlobalRef(mapClazzTmp);
-	env->DeleteLocalRef(mapClazzTmp);
-
-	size = env->GetMethodID(mapClazz, "size", "()I");
-
-	if (size == NULL)
-	{
-		Console::WriteLine("Cannot find class java/util/Map size method");
-		return;
-	}
-
-	getMapValue = env->GetMethodID(mapClazz, "get", "(Ljava/lang/Object;)Ljava/lang/Object;");
-
-	if (getMapValue == NULL)
-	{
-		Console::WriteLine("Cannot find class java/util/Map get method");
-	}
-
-	keySet = env->GetMethodID(mapClazz, "keySet", "()Ljava/util/Set;");
-
-	if (keySet == NULL)
-	{
-		Console::WriteLine("Cannot find class java/util/Map keySet method");
-	}
-
-	// java/util/Set
-	jclass setClazzTmp = env->FindClass("Ljava/util/Set;");
-
-	if (setClazzTmp == NULL)
-	{
-		Console::WriteLine("Cannot find class java/util/Set");
-	}
-
-	setClazz = (jclass)env->NewGlobalRef(setClazzTmp);
-	env->DeleteLocalRef(setClazzTmp);
-
-	toArray = env->GetMethodID(setClazz, "toArray", "()[Ljava/lang/Object;");
-
 	// jni/Response
 	jclass responseClazzTmp = env->FindClass("jni/Response");
 
@@ -224,8 +177,8 @@ void JniManager::cleanup()
 	try
 	{
 		env->DeleteGlobalRef(responseClazz);
-		env->DeleteGlobalRef(mapClazz);
-		env->DeleteGlobalRef(setClazz);
+		
+		typeConverter->cleanup();
 
 		/*if (env->ExceptionCheck())
 		{
@@ -239,23 +192,9 @@ void JniManager::cleanup()
 	
 }
 
-// Helpers
-//const char * JniManager::toCString(jstring input)
-//{
-//	if (input == NULL)
-//	{
-//		return nullptr;
-//	}
-//
-//	const char * c_input = env->GetStringUTFChars(input, false);
-//	env->ReleaseStringUTFChars(input, c_input);
-//
-//	return c_input;
-//}
-
-RouterSDK::ProcessRequest^ JniManager::toProcessRequest(jobject obj)
+Org::Mule::Api::Routing::ProcessRequest^ JniManager::toProcessRequest(jobject obj)
 {
-	RouterSDK::ProcessRequest^ request = gcnew RouterSDK::ProcessRequest();
+	Org::Mule::Api::Routing::ProcessRequest^ request = gcnew Org::Mule::Api::Routing::ProcessRequest();
 
 	request->AssemblyName = typeConverter->convertToC<String^>(env->CallObjectMethod(obj, getAssemblyName, "()Ljava/lang/String;"));
 	request->AssemblyPath = typeConverter->convertToC<String^>(env->CallObjectMethod(obj, getAssemblyPath, "()Ljava/lang/String;"));
@@ -264,7 +203,11 @@ RouterSDK::ProcessRequest^ JniManager::toProcessRequest(jobject obj)
 	request->IsSingleton = (jboolean)env->CallBooleanMethod(obj, getIsSingleton);
 	request->Log = (jboolean)env->CallBooleanMethod(obj, getLog);
 	request->NotifyEvents = (jboolean)env->CallBooleanMethod(obj, getNotifyEvents);
-	request->MethodArguments = toDictionary(env->CallObjectMethod(obj, getMethodArguments));
+	request->MethodArguments = typeConverter->convertToC<Dictionary<String^, Object^>^>(env->CallObjectMethod(obj, getMethodArguments));
+	request->InboundProperties = typeConverter->convertToC<Dictionary<String^, Object^>^>(env->CallObjectMethod(obj, getInboundProperties));
+	request->InvocationProperties = typeConverter->convertToC<Dictionary<String^, Object^>^>(env->CallObjectMethod(obj, getInvocationProperties));
+	request->OutboundProperties = typeConverter->convertToC<Dictionary<String^, Object^>^>(env->CallObjectMethod(obj, getOutboundProperties));
+	request->SessionProperties = typeConverter->convertToC<Dictionary<String^, Object^>^>(env->CallObjectMethod(obj, getSessionProperties));
 
 	return request;
 }
@@ -302,30 +245,3 @@ jobject JniManager::toResponseObject(String^ payload)
 
 	return response;
 }
-
-Dictionary<String^, Object^>^ JniManager::toDictionary(jobject map)
-{
-	Dictionary<String^, Object^>^ result = gcnew Dictionary<String^, Object^>();
-	
-	if (map == NULL)
-	{
-		return result;
-	}
-	
-	int mapSize = env->CallIntMethod(map, size);
-
-	jobject keys = env->CallObjectMethod(map, keySet);
-
-	jobjectArray arrayOfKeys = (jobjectArray)env->CallObjectMethod(keys, toArray);
-
-	for (int i = 0; i < mapSize; i++)
-	{
-		jstring keyName = (jstring)env->GetObjectArrayElement(arrayOfKeys, i);
-		jobject mapValue = env->CallObjectMethod(map, getMapValue, keyName);
-
-		result->Add(typeConverter->convertToC<String^>(keyName), typeConverter->toManagedObject(mapValue));
-	}
-
-	return result;
-}
-
