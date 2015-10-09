@@ -77,20 +77,28 @@ JNIEXPORT jobject JNICALL Java_jni_Router_InvokeNetMethod
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
 {
-	jniManager = new JniManager(vm);
-
-	JNIEnv* env = jniManager->getEnv();
-
-	if (!env)
+	try
 	{
+		jniManager = new JniManager(vm);
+
+		JNIEnv* env = jniManager->getEnv();
+
+		if (!env)
+		{
+			return JNI_ERR;
+		}
+
+		// attach to AssemblyResolve event
+		String^ path = System::IO::Path::GetDirectoryName(Assembly::GetExecutingAssembly()->Location);
+
+		AppDomain^ currentDomain = AppDomain::CurrentDomain;
+		currentDomain->AssemblyResolve += gcnew ResolveEventHandler(AssemblyResolver::MyResolveEventHandler);
+	}
+	catch (Exception^ ex)
+	{
+		Console::WriteLine(ex->Message);
 		return JNI_ERR;
 	}
-	
-	// attach to AssemblyResolve event
-	String^ path = System::IO::Path::GetDirectoryName(Assembly::GetExecutingAssembly()->Location);
-
-	AppDomain^ currentDomain = AppDomain::CurrentDomain;
-	currentDomain->AssemblyResolve += gcnew ResolveEventHandler(AssemblyResolver::MyResolveEventHandler);
 
 	return JNI_VERSION_1_6;
 }

@@ -26,7 +26,8 @@ void JniManager::init()
 
 	if (mapClazzTmp == NULL)
 	{
-		throw gcnew Exception("Cannot find class java/util/Map");
+		Console::WriteLine("Cannot find class java/util/Map");
+		return;
 	}
 
 	mapClazz = (jclass)env->NewGlobalRef(mapClazzTmp);
@@ -36,21 +37,22 @@ void JniManager::init()
 
 	if (size == NULL)
 	{
-		throw gcnew Exception("Cannot find class java/util/Map size method");
+		Console::WriteLine("Cannot find class java/util/Map size method");
+		return;
 	}
 
 	getMapValue = env->GetMethodID(mapClazz, "get", "(Ljava/lang/Object;)Ljava/lang/Object;");
 
 	if (getMapValue == NULL)
 	{
-		throw gcnew Exception("Cannot find class java/util/Map get method");
+		Console::WriteLine("Cannot find class java/util/Map get method");
 	}
 
 	keySet = env->GetMethodID(mapClazz, "keySet", "()Ljava/util/Set;");
 
 	if (keySet == NULL)
 	{
-		throw gcnew Exception("Cannot find class java/util/Map keySet method");
+		Console::WriteLine("Cannot find class java/util/Map keySet method");
 	}
 
 	// java/util/Set
@@ -58,7 +60,7 @@ void JniManager::init()
 
 	if (setClazzTmp == NULL)
 	{
-		throw gcnew Exception("Cannot find class java/util/Set");
+		Console::WriteLine("Cannot find class java/util/Set");
 	}
 
 	setClazz = (jclass)env->NewGlobalRef(setClazzTmp);
@@ -66,17 +68,12 @@ void JniManager::init()
 
 	toArray = env->GetMethodID(setClazz, "toArray", "()[Ljava/lang/Object;");
 
-	/*if (env->ExceptionCheck())
-	{*/
-		//env->Throw(env->ExceptionOccurred());
-	//}
-
 	// jni/Response
 	jclass responseClazzTmp = env->FindClass("jni/Response");
 
 	if (responseClazzTmp == NULL)
 	{
-		throw gcnew Exception("Cannot find class jni/Response");
+		Console::WriteLine("Cannot find class jni/Response");
 	}
 
 	responseClazz = (jclass)env->NewGlobalRef(responseClazzTmp);
@@ -86,14 +83,14 @@ void JniManager::init()
 
 	if (responseCtor == NULL)
 	{
-		throw gcnew Exception("Cannot find class jni/Response ctor");
+		Console::WriteLine("Cannot find class jni/Response ctor");
 	}
 
 	setPayloadMethod = env->GetMethodID(responseClazz, "setPayload", "(Ljava/lang/String;)V");
 
 	if (setPayloadMethod == NULL)
 	{
-		throw gcnew Exception("Cannot find class jni/Response setPayload method");
+		Console::WriteLine("Cannot find class jni/Response setPayload method");
 	}
 
 	// jni/Request
@@ -102,91 +99,91 @@ void JniManager::init()
 
 	if (processRequestClazz == NULL)
 	{
-		throw gcnew Exception("Cannot find class jni/Request");
+		Console::WriteLine("Cannot find class jni/Request");
 	}
 
 	getAssemblyName = env->GetMethodID(processRequestClazz, "getAssemblyName", "()Ljava/lang/String;");
 
 	if (getAssemblyName == NULL)
 	{
-		throw gcnew Exception("Cannot find class jni/Request getAssemblyName method");
+		Console::WriteLine("Cannot find class jni/Request getAssemblyName method");
 	}
 
 	getAssemblyPath = env->GetMethodID(processRequestClazz, "getAssemblyPath", "()Ljava/lang/String;");
 
 	if (getAssemblyPath == NULL)
 	{
-		throw gcnew Exception("Cannot find class jni/Request getAssemblyPath method");
+		Console::WriteLine("Cannot find class jni/Request getAssemblyPath method");
 	}
 
 	getMethodName = env->GetMethodID(processRequestClazz, "getMethodName", "()Ljava/lang/String;");
 
 	if (getMethodName == NULL)
 	{
-		throw gcnew Exception("Cannot find class jni/Request getMethodName method");
+		Console::WriteLine("Cannot find class jni/Request getMethodName method");
 	}
 
 	getLog = env->GetMethodID(processRequestClazz, "getLog", "()Ljava/lang/Boolean;");
 
 	if (getLog == NULL)
 	{
-		throw gcnew Exception("Cannot find class jni/Request getLog method");
+		Console::WriteLine("Cannot find class jni/Request getLog method");
 	}
 
 	getNotifyEvents = env->GetMethodID(processRequestClazz, "getNotifyEvents", "()Ljava/lang/Boolean;");
 
 	if (getNotifyEvents == NULL)
 	{
-		throw gcnew Exception("Cannot find class jni/Request getNotifyEvents method");
+		Console::WriteLine("Cannot find class jni/Request getNotifyEvents method");
 	}
 
 	getFullTrust = env->GetMethodID(processRequestClazz, "getFullTrust", "()Ljava/lang/Boolean;");
 
 	if (getFullTrust == NULL)
 	{
-		throw gcnew Exception("Cannot find class jni/Request getFullTrust method");
+		Console::WriteLine("Cannot find class jni/Request getFullTrust method");
 	}
 
 	getIsSingleton = env->GetMethodID(processRequestClazz, "getIsSingleton", "()Ljava/lang/Boolean;");
 
 	if (getIsSingleton == NULL)
 	{
-		throw gcnew Exception("Cannot find class jni/Request getIsSingleton method");
+		Console::WriteLine("Cannot find class jni/Request getIsSingleton method");
 	}
 
 	getInboundProperties = env->GetMethodID(processRequestClazz, "getInboundProperties", "()Ljava/util/Map;");
 
 	if (getInboundProperties == NULL)
 	{
-		throw gcnew Exception("Cannot find class jni/Request getInboundProperties method");
+		Console::WriteLine("Cannot find class jni/Request getInboundProperties method");
 	}
 
 	getMethodArguments = env->GetMethodID(processRequestClazz, "getMethodArguments", "()Ljava/util/Map;");
 
 	if (getMethodArguments == NULL)
 	{
-		throw gcnew Exception("Cannot find class jni/Request getMethodArguments method");
+		Console::WriteLine("Cannot find class jni/Request getMethodArguments method");
 	}
 
 	getInvocationProperties = env->GetMethodID(processRequestClazz, "getInvocationProperties", "()Ljava/util/Map;");
 
 	if (getInvocationProperties == NULL)
 	{
-		throw gcnew Exception("Cannot find class jni/Request getInvocationProperties method");
+		Console::WriteLine("Cannot find class jni/Request getInvocationProperties method");
 	}
 
 	getSessionProperties = env->GetMethodID(processRequestClazz, "getSessionProperties", "()Ljava/util/Map;");
 
 	if (getSessionProperties == NULL)
 	{
-		throw gcnew Exception("Cannot find class jni/Request getSessionProperties method");
+		Console::WriteLine("Cannot find class jni/Request getSessionProperties method");
 	}
 
 	getOutboundProperties = env->GetMethodID(processRequestClazz, "getOutboundProperties", "()Ljava/util/Map;");
 
 	if (getOutboundProperties == NULL)
 	{
-		throw gcnew Exception("Cannot find class jni/Request getOutboundProperties method");
+		Console::WriteLine("Cannot find class jni/Request getOutboundProperties method");
 	}
 }
 
