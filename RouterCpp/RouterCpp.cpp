@@ -33,6 +33,11 @@ ref class AssemblyResolver
 		}
 };
 
+ref class GlobalObjects {
+public:
+	static Org::Mule::Api::Routing::Router^ router = gcnew Org::Mule::Api::Routing::Router();
+};
+
 static JniManager* jniManager;
 
 JNIEXPORT jobject JNICALL Java_jni_Router_InvokeNetMethod
@@ -41,7 +46,7 @@ JNIEXPORT jobject JNICALL Java_jni_Router_InvokeNetMethod
 	try
 	{
 		Org::Mule::Api::Routing::ProcessRequest^ processRequest = jniManager->toProcessRequest(request);
-		Org::Mule::Api::Routing::Router^ router = gcnew Org::Mule::Api::Routing::Router();
+		
 		try
 		{
 			/*Assembly^ myAss = Assembly::LoadFrom("C:\\Users\\nico\\Documents\\visual studio 2013\\Projects\\Router\\RouterSharp\\bin\\Debug\\RouterSharp.dll");
@@ -55,7 +60,7 @@ JNIEXPORT jobject JNICALL Java_jni_Router_InvokeNetMethod
 			Object^ result = myMethod->Invoke(instance, local);*/
 			//System::Console::WriteLine(result->ToString());
 
-			Org::Mule::Api::Routing::ProcessRequest^ result = (Org::Mule::Api::Routing::ProcessRequest^)router->Process(processRequest);
+			Org::Mule::Api::Routing::ProcessRequest^ result = (Org::Mule::Api::Routing::ProcessRequest^)GlobalObjects::router->Process(processRequest);
 			
 			
 			jobject responseInstance = jniManager->toResponseObject(result->Result->ToString());
@@ -83,6 +88,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
 	try
 	{
 		jniManager = new JniManager(vm);
+		//GlobalObjects::router = gcnew Org::Mule::Api::Routing::Router();
 
 		JNIEnv* env = jniManager->getEnv();
 

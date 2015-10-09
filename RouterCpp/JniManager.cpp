@@ -199,10 +199,10 @@ Org::Mule::Api::Routing::ProcessRequest^ JniManager::toProcessRequest(jobject ob
 	request->AssemblyName = typeConverter->convertToC<String^>(env->CallObjectMethod(obj, getAssemblyName, "()Ljava/lang/String;"));
 	request->AssemblyPath = typeConverter->convertToC<String^>(env->CallObjectMethod(obj, getAssemblyPath, "()Ljava/lang/String;"));
 	request->MethodName = typeConverter->convertToC<String^>(env->CallObjectMethod(obj, getMethodName, "()Ljava/lang/String;"));
-	request->FullTrust = (jboolean)env->CallBooleanMethod(obj, getFullTrust);
-	request->IsSingleton = (jboolean)env->CallBooleanMethod(obj, getIsSingleton);
-	request->Log = (jboolean)env->CallBooleanMethod(obj, getLog);
-	request->NotifyEvents = (jboolean)env->CallBooleanMethod(obj, getNotifyEvents);
+	request->FullTrust = typeConverter->convertToC<bool>(env->CallObjectMethod(obj, getFullTrust, "()Ljava/lang/Boolean;"));
+	request->IsSingleton = typeConverter->convertToC<bool>(env->CallObjectMethod(obj, getIsSingleton, "()Ljava/lang/Boolean;"));
+	request->Log = typeConverter->convertToC<bool>(env->CallObjectMethod(obj, getLog, "()Ljava/lang/Boolean;"));
+	request->NotifyEvents = typeConverter->convertToC<bool>(env->CallObjectMethod(obj, getNotifyEvents, "()Ljava/lang/Boolean;"));
 	request->MethodArguments = typeConverter->convertToC<Dictionary<String^, Object^>^>(env->CallObjectMethod(obj, getMethodArguments));
 	request->InboundProperties = typeConverter->convertToC<Dictionary<String^, Object^>^>(env->CallObjectMethod(obj, getInboundProperties));
 	request->InvocationProperties = typeConverter->convertToC<Dictionary<String^, Object^>^>(env->CallObjectMethod(obj, getInvocationProperties));
