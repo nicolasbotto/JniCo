@@ -22,12 +22,12 @@ ref class AssemblyResolver
 
 			if (System::IO::File::Exists(pathToLoadFrom))
 			{
-				Console::WriteLine("Loading assembly from: " + pathToLoadFrom);
+				//Console::WriteLine("Loading assembly from: " + pathToLoadFrom);
 				return Assembly::LoadFrom(pathToLoadFrom);
 			}
 			else
 			{
-				Console::WriteLine("Cannot load  assembly from: " + pathToLoadFrom);
+				//Console::WriteLine("Cannot load  assembly from: " + pathToLoadFrom);
 				return nullptr;
 			}
 		}
@@ -49,19 +49,7 @@ JNIEXPORT jobject JNICALL Java_jni_Router_InvokeNetMethod
 		
 		try
 		{
-			/*Assembly^ myAss = Assembly::LoadFrom("C:\\Users\\nico\\Documents\\visual studio 2013\\Projects\\Router\\RouterSharp\\bin\\Debug\\RouterSharp.dll");
-			Type^ myType = myAss->GetType("RouterSharp.Router");
-
-			MethodInfo^ myMethod = myType->GetMethod("ExecuteMethod");
-			Object^ instance = Activator::CreateInstance(myType);
-			array< Object^ >^ local = gcnew array< Object^ >(1);
-			local[0] = processRequest;
-			
-			Object^ result = myMethod->Invoke(instance, local);*/
-			//System::Console::WriteLine(result->ToString());
-
 			Org::Mule::Api::Routing::ProcessRequest^ result = (Org::Mule::Api::Routing::ProcessRequest^)GlobalObjects::router->Process(processRequest);
-			
 			
 			jobject responseInstance = jniManager->toResponseObject(result->Result->ToString());
 
@@ -88,8 +76,6 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
 	try
 	{
 		jniManager = new JniManager(vm);
-		//GlobalObjects::router = gcnew Org::Mule::Api::Routing::Router();
-
 		JNIEnv* env = jniManager->getEnv();
 
 		if (!env)

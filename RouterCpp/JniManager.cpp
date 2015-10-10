@@ -76,28 +76,28 @@ void JniManager::init()
 		Console::WriteLine("Cannot find class jni/Request getMethodName method");
 	}
 
-	getLog = env->GetMethodID(processRequestClazz, "getLog", "()Ljava/lang/Boolean;");
+	getLog = env->GetMethodID(processRequestClazz, "getLog", "()Z");
 
 	if (getLog == NULL)
 	{
 		Console::WriteLine("Cannot find class jni/Request getLog method");
 	}
 
-	getNotifyEvents = env->GetMethodID(processRequestClazz, "getNotifyEvents", "()Ljava/lang/Boolean;");
+	getNotifyEvents = env->GetMethodID(processRequestClazz, "getNotifyEvents", "()Z");
 
 	if (getNotifyEvents == NULL)
 	{
 		Console::WriteLine("Cannot find class jni/Request getNotifyEvents method");
 	}
 
-	getFullTrust = env->GetMethodID(processRequestClazz, "getFullTrust", "()Ljava/lang/Boolean;");
+	getFullTrust = env->GetMethodID(processRequestClazz, "getFullTrust", "()Z");
 
 	if (getFullTrust == NULL)
 	{
 		Console::WriteLine("Cannot find class jni/Request getFullTrust method");
 	}
 
-	getIsSingleton = env->GetMethodID(processRequestClazz, "getIsSingleton", "()Ljava/lang/Boolean;");
+	getIsSingleton = env->GetMethodID(processRequestClazz, "getIsSingleton", "()Z");
 
 	if (getIsSingleton == NULL)
 	{
@@ -199,10 +199,10 @@ Org::Mule::Api::Routing::ProcessRequest^ JniManager::toProcessRequest(jobject ob
 	request->AssemblyName = typeConverter->convertToC<String^>(env->CallObjectMethod(obj, getAssemblyName, "()Ljava/lang/String;"));
 	request->AssemblyPath = typeConverter->convertToC<String^>(env->CallObjectMethod(obj, getAssemblyPath, "()Ljava/lang/String;"));
 	request->MethodName = typeConverter->convertToC<String^>(env->CallObjectMethod(obj, getMethodName, "()Ljava/lang/String;"));
-	request->FullTrust = typeConverter->convertToC<bool>(env->CallObjectMethod(obj, getFullTrust, "()Ljava/lang/Boolean;"));
-	request->IsSingleton = typeConverter->convertToC<bool>(env->CallObjectMethod(obj, getIsSingleton, "()Ljava/lang/Boolean;"));
-	request->Log = typeConverter->convertToC<bool>(env->CallObjectMethod(obj, getLog, "()Ljava/lang/Boolean;"));
-	request->NotifyEvents = typeConverter->convertToC<bool>(env->CallObjectMethod(obj, getNotifyEvents, "()Ljava/lang/Boolean;"));
+	request->FullTrust = env->CallBooleanMethod(obj, getFullTrust);
+	request->IsSingleton = env->CallBooleanMethod(obj, getIsSingleton);
+	request->Log = env->CallBooleanMethod(obj, getLog);
+	request->NotifyEvents = env->CallBooleanMethod(obj, getNotifyEvents);
 	request->MethodArguments = typeConverter->convertToC<Dictionary<String^, Object^>^>(env->CallObjectMethod(obj, getMethodArguments));
 	request->InboundProperties = typeConverter->convertToC<Dictionary<String^, Object^>^>(env->CallObjectMethod(obj, getInboundProperties));
 	request->InvocationProperties = typeConverter->convertToC<Dictionary<String^, Object^>^>(env->CallObjectMethod(obj, getInvocationProperties));
@@ -210,24 +210,6 @@ Org::Mule::Api::Routing::ProcessRequest^ JniManager::toProcessRequest(jobject ob
 	request->SessionProperties = typeConverter->convertToC<Dictionary<String^, Object^>^>(env->CallObjectMethod(obj, getSessionProperties));
 
 	return request;
-}
-
-array<int>^ JniManager::toIntArray(jintArray input)
-{
-	const int intsSize = env->GetArrayLength(input);
-
-	array<int>^ intArray = gcnew array<int>(intsSize);
-
-	jint *body = env->GetIntArrayElements(input, false);
-
-	env->ReleaseIntArrayElements(input, body, 0);
-
-	for (int i = 0; i < intsSize; i++)
-	{
-		intArray[i] = body[i];
-	}
-
-	return intArray;
 }
 
 jobject JniManager::toResponseObject(String^ payload)

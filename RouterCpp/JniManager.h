@@ -38,8 +38,8 @@ public:
 	void setJVM(JavaVM*);
 	JavaVM* getJVM();
 	JNIEnv* getEnv();
-	array<int>^ toIntArray(jintArray);
 	Org::Mule::Api::Routing::ProcessRequest^ toProcessRequest(jobject);
 	jobject toResponseObject(String^);
 	void cleanup();
+
 };

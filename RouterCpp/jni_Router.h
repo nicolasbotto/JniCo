@@ -9,46 +9,6 @@ extern "C" {
 #endif
 	/*
 	* Class:     jni_Router
-	* Method:    ExecuteMethod
-	* Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljni/Response;
-	*/
-	JNIEXPORT jobject JNICALL Java_jni_Router_ExecuteMethod
-		(JNIEnv *, jobject, jstring, jstring, jstring);
-
-	/*
-	* Class:     jni_Router
-	* Method:    GetInt
-	* Signature: ()I
-	*/
-	JNIEXPORT jint JNICALL Java_jni_Router_GetInt
-		(JNIEnv *, jobject);
-
-	/*
-	* Class:     jni_Router
-	* Method:    GetDouble
-	* Signature: ()D
-	*/
-	JNIEXPORT jdouble JNICALL Java_jni_Router_GetDouble
-		(JNIEnv *, jobject);
-
-	/*
-	* Class:     jni_Router
-	* Method:    GetBoolean
-	* Signature: ()Z
-	*/
-	JNIEXPORT jboolean JNICALL Java_jni_Router_GetBoolean
-		(JNIEnv *, jobject);
-
-	/*
-	* Class:     jni_Router
-	* Method:    PassArray
-	* Signature: ([I[B[Ljava/lang/String;)Ljni/Response;
-	*/
-	JNIEXPORT jintArray JNICALL Java_jni_Router_PassArray
-		(JNIEnv *, jobject, jintArray, jbyteArray, jobjectArray);
-
-	/*
-	* Class:     jni_Router
 	* Method:    InvokeNetMethod
 	* Signature: (Ljni/Request;)Ljni/Response;
 	*/
