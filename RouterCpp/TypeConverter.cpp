@@ -406,6 +406,29 @@ array<byte>^ TypeConverter::convertToC(jobject obj)
 }
 
 template<>
+array<array<byte>^>^ TypeConverter::convertToC(jobject obj)
+{
+	jobjectArray input = (jobjectArray)obj;
+	const int intsSize = env->GetArrayLength(input);
+
+	array<array<byte>^>^ byteArray = gcnew array<array<byte>^>(intsSize);
+
+	for (int i = 0; i < intsSize; i++)
+	{
+		jobject body = env->GetObjectArrayElement(input, i);
+		byteArray[i] = convertToC<array<byte>^>(body);
+
+		env->DeleteLocalRef((jobject)body);
+	}
+	
+	env->DeleteLocalRef(input);
+
+	return byteArray;
+}
+
+
+
+template<>
 array<String^>^ TypeConverter::convertToC(jobject obj)
 {
 	jobjectArray input = (jobjectArray)obj;
@@ -537,6 +560,13 @@ Object^ TypeConverter::toManagedObject(jobject obj)
 	if (className->Equals("[Ljava.lang.String;", StringComparison::InvariantCultureIgnoreCase))
 	{
 		result = convertToC<array<String^>^>(obj);
+		env->DeleteLocalRef(obj);
+	}
+
+	//TODO: [[I (two dimensions) & ByteBuffer
+	if (className->Equals("[[B", StringComparison::InvariantCultureIgnoreCase))
+	{
+		result = convertToC<array<array<byte>^>^>(obj);
 		env->DeleteLocalRef(obj);
 	}
 
