@@ -262,13 +262,13 @@ array<double>^ TypeConverter::convertToC(jobject obj)
 }
 
 template<>
-array<char>^ TypeConverter::convertToC(jobject obj)
+array<Char>^ TypeConverter::convertToC(jobject obj)
 {
 	jcharArray input = (jcharArray)obj;
 
 	const int intsSize = env->GetArrayLength(input);
 
-	array<char>^ charArray = gcnew array<char>(intsSize);
+	array<Char>^ charArray = gcnew array<Char>(intsSize);
 
 	jchar *body = env->GetCharArrayElements(input, false);
 
@@ -308,6 +308,31 @@ array<long>^ TypeConverter::convertToC(jobject obj)
 
 	return charArray;
 }
+
+template<>
+array<Int64>^ TypeConverter::convertToC(jobject obj)
+{
+	jlongArray input = (jlongArray)obj;
+
+	const int intsSize = env->GetArrayLength(input);
+
+	array<Int64>^ charArray = gcnew array<Int64>(intsSize);
+
+	jlong *body = env->GetLongArrayElements(input, false);
+
+	env->ReleaseLongArrayElements(input, body, 0);
+
+	for (int i = 0; i < intsSize; i++)
+	{
+		charArray[i] = body[i];
+	}
+
+	env->DeleteLocalRef((jobject)body);
+	env->DeleteLocalRef(input);
+
+	return charArray;
+}
+
 
 template<>
 array<bool>^ TypeConverter::convertToC(jobject obj)
@@ -406,29 +431,6 @@ array<byte>^ TypeConverter::convertToC(jobject obj)
 }
 
 template<>
-array<array<byte>^>^ TypeConverter::convertToC(jobject obj)
-{
-	jobjectArray input = (jobjectArray)obj;
-	const int intsSize = env->GetArrayLength(input);
-
-	array<array<byte>^>^ byteArray = gcnew array<array<byte>^>(intsSize);
-
-	for (int i = 0; i < intsSize; i++)
-	{
-		jobject body = env->GetObjectArrayElement(input, i);
-		byteArray[i] = convertToC<array<byte>^>(body);
-
-		env->DeleteLocalRef((jobject)body);
-	}
-	
-	env->DeleteLocalRef(input);
-
-	return byteArray;
-}
-
-
-
-template<>
 array<String^>^ TypeConverter::convertToC(jobject obj)
 {
 	jobjectArray input = (jobjectArray)obj;
@@ -444,6 +446,197 @@ array<String^>^ TypeConverter::convertToC(jobject obj)
 		stringArray[i] = convertToC<String^>(item);
 
 		env->DeleteLocalRef(item);
+	}
+
+	env->DeleteLocalRef(input);
+
+	return stringArray;
+}
+
+// 2 dimensional arrays
+template<>
+array<array<byte>^>^ TypeConverter::convertToC(jobject obj)
+{
+	jobjectArray input = (jobjectArray)obj;
+	const int intsSize = env->GetArrayLength(input);
+
+	array<array<byte>^>^ byteArray = gcnew array<array<byte>^>(intsSize);
+
+	for (int i = 0; i < intsSize; i++)
+	{
+		jobject body = env->GetObjectArrayElement(input, i);
+		byteArray[i] = convertToC<array<byte>^>(body);
+
+		env->DeleteLocalRef((jobject)body);
+	}
+
+	env->DeleteLocalRef(input);
+
+	return byteArray;
+}
+
+
+template<>
+array<array<int>^>^ TypeConverter::convertToC(jobject obj)
+{
+	jobjectArray input = (jobjectArray)obj;
+	const int intsSize = env->GetArrayLength(input);
+
+	array<array<int>^>^ intArray = gcnew array<array<int>^>(intsSize);
+
+	for (int i = 0; i < intsSize; i++)
+	{
+		jobject body = env->GetObjectArrayElement(input, i);
+		intArray[i] = convertToC<array<int>^>(body);
+
+		env->DeleteLocalRef((jobject)body);
+	}
+
+	env->DeleteLocalRef(input);
+
+	return intArray;
+}
+
+template<>
+array<array<Char>^>^ TypeConverter::convertToC(jobject obj)
+{
+	jobjectArray input = (jobjectArray)obj;
+	const int intsSize = env->GetArrayLength(input);
+
+	array<array<Char>^>^ charArray = gcnew array<array<Char>^>(intsSize);
+
+	for (int i = 0; i < intsSize; i++)
+	{
+		jobject body = env->GetObjectArrayElement(input, i);
+		charArray[i] = convertToC<array<Char>^>(body);
+
+		env->DeleteLocalRef((jobject)body);
+	}
+
+	env->DeleteLocalRef(input);
+
+	return charArray;
+}
+
+template<>
+array<array<double>^>^ TypeConverter::convertToC(jobject obj)
+{
+	jobjectArray input = (jobjectArray)obj;
+	const int intsSize = env->GetArrayLength(input);
+
+	array<array<double>^>^ doubleArray = gcnew array<array<double>^>(intsSize);
+
+	for (int i = 0; i < intsSize; i++)
+	{
+		jobject body = env->GetObjectArrayElement(input, i);
+		doubleArray[i] = convertToC<array<double>^>(body);
+
+		env->DeleteLocalRef((jobject)body);
+	}
+
+	env->DeleteLocalRef(input);
+
+	return doubleArray;
+}
+
+template<>
+array<array<float>^>^ TypeConverter::convertToC(jobject obj)
+{
+	jobjectArray input = (jobjectArray)obj;
+	const int intsSize = env->GetArrayLength(input);
+
+	array<array<float>^>^ floatArray = gcnew array<array<float>^>(intsSize);
+
+	for (int i = 0; i < intsSize; i++)
+	{
+		jobject body = env->GetObjectArrayElement(input, i);
+		floatArray[i] = convertToC<array<float>^>(body);
+
+		env->DeleteLocalRef((jobject)body);
+	}
+
+	env->DeleteLocalRef(input);
+
+	return floatArray;
+}
+
+template<>
+array<array<Int64>^>^ TypeConverter::convertToC(jobject obj)
+{
+	jobjectArray input = (jobjectArray)obj;
+	const int intsSize = env->GetArrayLength(input);
+
+	array<array<Int64>^>^ longArray = gcnew array<array<Int64>^>(intsSize);
+
+	for (int i = 0; i < intsSize; i++)
+	{
+		jobject body = env->GetObjectArrayElement(input, i);
+		longArray[i] = convertToC<array<Int64>^>(body);
+
+		env->DeleteLocalRef((jobject)body);
+	}
+
+	env->DeleteLocalRef(input);
+
+	return longArray;
+}
+
+template<>
+array<array<bool>^>^ TypeConverter::convertToC(jobject obj)
+{
+	jobjectArray input = (jobjectArray)obj;
+	const int intsSize = env->GetArrayLength(input);
+
+	array<array<bool>^>^ boolArray = gcnew array<array<bool>^>(intsSize);
+
+	for (int i = 0; i < intsSize; i++)
+	{
+		jobject body = env->GetObjectArrayElement(input, i);
+		boolArray[i] = convertToC<array<bool>^>(body);
+
+		env->DeleteLocalRef((jobject)body);
+	}
+
+	env->DeleteLocalRef(input);
+
+	return boolArray;
+}
+
+template<>
+array<array<short>^>^ TypeConverter::convertToC(jobject obj)
+{
+	jobjectArray input = (jobjectArray)obj;
+	const int intsSize = env->GetArrayLength(input);
+
+	array<array<short>^>^ shortArray = gcnew array<array<short>^>(intsSize);
+
+	for (int i = 0; i < intsSize; i++)
+	{
+		jobject body = env->GetObjectArrayElement(input, i);
+		shortArray[i] = convertToC<array<short>^>(body);
+
+		env->DeleteLocalRef((jobject)body);
+	}
+
+	env->DeleteLocalRef(input);
+
+	return shortArray;
+}
+
+template<>
+array<array<String^>^>^ TypeConverter::convertToC(jobject obj)
+{
+	jobjectArray input = (jobjectArray)obj;
+	const int intsSize = env->GetArrayLength(input);
+
+	array<array<String^>^>^ stringArray = gcnew array<array<String^>^>(intsSize);
+
+	for (int i = 0; i < intsSize; i++)
+	{
+		jobject body = env->GetObjectArrayElement(input, i);
+		stringArray[i] = convertToC<array<String^>^>(body);
+
+		env->DeleteLocalRef((jobject)body);
 	}
 
 	env->DeleteLocalRef(input);
@@ -508,7 +701,7 @@ Object^ TypeConverter::toManagedObject(jobject obj)
 		env->DeleteLocalRef(obj);
 	}
 
-	// arrays
+	// one dimension arrays
 	if (className->Equals("[I", StringComparison::InvariantCultureIgnoreCase))
 	{
 		result = convertToC<array<int>^>(obj);
@@ -535,7 +728,7 @@ Object^ TypeConverter::toManagedObject(jobject obj)
 
 	if (className->Equals("[C", StringComparison::InvariantCultureIgnoreCase))
 	{
-		result = convertToC<array<char>^>(obj);
+		result = convertToC<array<Char>^>(obj);
 		env->DeleteLocalRef(obj);
 	}
 
@@ -567,6 +760,54 @@ Object^ TypeConverter::toManagedObject(jobject obj)
 	if (className->Equals("[[B", StringComparison::InvariantCultureIgnoreCase))
 	{
 		result = convertToC<array<array<byte>^>^>(obj);
+		env->DeleteLocalRef(obj);
+	}
+
+	if (className->Equals("[[C", StringComparison::InvariantCultureIgnoreCase))
+	{
+		result = convertToC<array<array<Char>^>^>(obj);
+		env->DeleteLocalRef(obj);
+	}
+
+	if (className->Equals("[[S", StringComparison::InvariantCultureIgnoreCase))
+	{
+		result = convertToC<array<array<short>^>^>(obj);
+		env->DeleteLocalRef(obj);
+	}
+
+	if (className->Equals("[[J", StringComparison::InvariantCultureIgnoreCase))
+	{
+		result = convertToC<array<array<Int64>^>^>(obj);
+		env->DeleteLocalRef(obj);
+	}
+
+	if (className->Equals("[[F", StringComparison::InvariantCultureIgnoreCase))
+	{
+		result = convertToC<array<array<float>^>^>(obj);
+		env->DeleteLocalRef(obj);
+	}
+
+	if (className->Equals("[[Ljava.lang.String;", StringComparison::InvariantCultureIgnoreCase))
+	{
+		result = convertToC<array<array<String^>^>^>(obj);
+		env->DeleteLocalRef(obj);
+	}
+
+	if (className->Equals("[[I", StringComparison::InvariantCultureIgnoreCase))
+	{
+		result = convertToC<array<array<int>^>^>(obj);
+		env->DeleteLocalRef(obj);
+	}
+
+	if (className->Equals("[[D", StringComparison::InvariantCultureIgnoreCase))
+	{
+		result = convertToC<array<array<double>^>^>(obj);
+		env->DeleteLocalRef(obj);
+	}
+
+	if (className->Equals("[[Z", StringComparison::InvariantCultureIgnoreCase))
+	{
+		result = convertToC<array<array<bool>^>^>(obj);
 		env->DeleteLocalRef(obj);
 	}
 
