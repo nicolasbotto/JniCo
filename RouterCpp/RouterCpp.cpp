@@ -10,7 +10,8 @@
 using namespace System;
 using namespace System::Reflection;
 
-void OnOnLog(System::Object ^sender, Org::Mule::Api::Routing::MessageEventArgs ^e);
+static void OnOnLog(System::Object ^sender, Org::Mule::Api::Routing::MessageEventArgs ^e);
+
 ref class AssemblyResolver
 {
 	public:
@@ -34,58 +35,20 @@ ref class AssemblyResolver
 		}
 };
 
-delegate void MyCallback(String^ str);
-
 ref class GlobalObjects {
 public:
-	//static Org::Mule::Api::Routing::Router^ router = gcnew Org::Mule::Api::Routing::Router();
-
-	static void MyLoggerEvent(Object^ sender, Org::Mule::Api::Routing::MessageEventArgs^ args)
-	{
-		Console::WriteLine(args->Message);
-	}
 	static Org::Mule::Api::Routing::Router^ router;
 
 	static void init()
 	{
 		router = gcnew Org::Mule::Api::Routing::Router();
-		router->OnLog += gcnew System::EventHandler<Org::Mule::Api::Routing::MessageEventArgs ^>(&GlobalObjects::OnOnLog);
+		router->OnLog += gcnew System::EventHandler<Org::Mule::Api::Routing::MessageEventArgs ^>(&OnOnLog);
 	}
-	static void OnOnLog(System::Object ^sender, Org::Mule::Api::Routing::MessageEventArgs ^e);
+	
 };
 
 static JniManager* jniManager;
-
-JNIEXPORT jobject JNICALL Java_jni_Router_InvokeNetMethod
-(JNIEnv *env, jobject obj, jobject request)
-{
-	try
-	{
-		Org::Mule::Api::Routing::ProcessRequest^ processRequest = jniManager->toProcessRequest(request);
-		
-		try
-		{
-			Org::Mule::Api::Routing::ProcessRequest^ result = (Org::Mule::Api::Routing::ProcessRequest^)GlobalObjects::router->Process(processRequest);
-			
-			jobject responseInstance = jniManager->toResponseObject(result->Result->ToString());
-
-			return responseInstance;
-		}
-		catch (Exception^ ex)
-		{
-			System::Console::WriteLine(ex->Message);
-		}
-
-		jobject responseInstance = jniManager->toResponseObject(processRequest->AssemblyName);
-		
-		return responseInstance;
-	
-	}
-	catch (Exception^ ex)
-	{
-		System::Console::WriteLine(ex->Message);
-	}
-}
+static jobject javaRouter;
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
 {
@@ -106,9 +69,6 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
 		currentDomain->AssemblyResolve += gcnew ResolveEventHandler(AssemblyResolver::MyResolveEventHandler);
 
 		GlobalObjects::init();
-		//Org::Mule::Api::Routing::Router^ r = GlobalObjects::router;
-
-		//GlobalObjects::router->OnLog += gcnew System::EventHandler<Org::Mule::Api::Routing::MessageEventArgs ^>(GlobalObjects::MyLoggerEvent);
 	}
 	catch (Exception^ ex)
 	{
@@ -124,19 +84,49 @@ JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved)
 {
 	Console::WriteLine("JNI_OnUnload called.");
 
-	//TODO REMOVE javaRouter globalreference
 	//remove global references
 	jniManager->cleanup();
 }
 
-static jobject javaRouter;
 JNIEXPORT void JNICALL Java_jni_Router_Init
 (JNIEnv *env, jobject obj)
 {
 	jniManager->setRouter(obj);
 }
 
-void GlobalObjects::OnOnLog(System::Object ^sender, Org::Mule::Api::Routing::MessageEventArgs ^e)
+JNIEXPORT jobject JNICALL Java_jni_Router_InvokeNetMethod
+(JNIEnv *env, jobject obj, jobject request)
+{
+	try
+	{
+		Org::Mule::Api::Routing::ProcessRequest^ processRequest = jniManager->toProcessRequest(request);
+
+		try
+		{
+			Org::Mule::Api::Routing::ProcessRequest^ result = (Org::Mule::Api::Routing::ProcessRequest^)GlobalObjects::router->Process(processRequest);
+
+			jobject responseInstance = jniManager->toResponseObject(result->Result->ToString());
+
+			return responseInstance;
+		}
+		catch (Exception^ ex)
+		{
+			System::Console::WriteLine(ex->Message);
+		}
+
+		jobject responseInstance = jniManager->toResponseObject(processRequest->AssemblyName);
+
+		return responseInstance;
+
+	}
+	catch (Exception^ ex)
+	{
+		System::Console::WriteLine(ex->Message);
+	}
+}
+
+// Event callback for logging
+void OnOnLog(System::Object ^sender, Org::Mule::Api::Routing::MessageEventArgs ^e)
 {
 	jniManager->log(e->Message);
 }
