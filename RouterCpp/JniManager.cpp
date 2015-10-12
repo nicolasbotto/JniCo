@@ -21,6 +21,23 @@ void JniManager::init()
 
 	typeConverter = new TypeConverter(env);
 
+	// jni/Router
+	jclass routerClazzTmp = env->FindClass("jni/Router");
+
+	if (routerClazzTmp == NULL)
+	{
+		Console::WriteLine("Cannot find class jni/Router");
+	}
+
+	logMethod = env->GetMethodID(routerClazzTmp, "log", "(Ljava/lang/String;)V");
+
+	if (logMethod == NULL)
+	{
+		Console::WriteLine("Cannot find class jni/Router method log");
+	}
+
+	env->DeleteLocalRef(routerClazzTmp);
+
 	// jni/Response
 	jclass responseClazzTmp = env->FindClass("jni/Response");
 
@@ -140,6 +157,23 @@ void JniManager::init()
 	}
 }
 
+void JniManager::setRouter(jobject obj)
+{
+	routerInstance = env->NewGlobalRef(obj);
+}
+
+void JniManager::log(String^ message)
+{
+	msclr::interop::marshal_context ctx;
+	const char* c_message = ctx.marshal_as<const char*>(message);
+
+	jstring j_message = env->NewStringUTF(c_message);
+
+	env->CallVoidMethod(routerInstance, logMethod, j_message);
+
+	env->DeleteLocalRef(j_message);
+}
+
 void JniManager::setJVM(JavaVM* java)
 {
 	jvm = java;
@@ -177,7 +211,8 @@ void JniManager::cleanup()
 	try
 	{
 		env->DeleteGlobalRef(responseClazz);
-		
+		env->DeleteGlobalRef(routerInstance);
+
 		typeConverter->cleanup();
 
 		/*if (env->ExceptionCheck())

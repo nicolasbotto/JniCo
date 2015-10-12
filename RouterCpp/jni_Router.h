@@ -15,6 +15,14 @@ extern "C" {
 	JNIEXPORT jobject JNICALL Java_jni_Router_InvokeNetMethod
 		(JNIEnv *, jobject, jobject);
 
+	/*
+	* Class:     jni_Router
+	* Method:    Init
+	* Signature: ()V;
+	*/
+	JNIEXPORT void JNICALL Java_jni_Router_Init
+		(JNIEnv *, jobject);
+
 #ifdef __cplusplus
 }
 #endif

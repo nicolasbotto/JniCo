@@ -10,6 +10,7 @@
 using namespace System;
 using namespace System::Reflection;
 
+void OnOnLog(System::Object ^sender, Org::Mule::Api::Routing::MessageEventArgs ^e);
 ref class AssemblyResolver
 {
 	public:
@@ -33,9 +34,24 @@ ref class AssemblyResolver
 		}
 };
 
+delegate void MyCallback(String^ str);
+
 ref class GlobalObjects {
 public:
-	static Org::Mule::Api::Routing::Router^ router = gcnew Org::Mule::Api::Routing::Router();
+	//static Org::Mule::Api::Routing::Router^ router = gcnew Org::Mule::Api::Routing::Router();
+
+	static void MyLoggerEvent(Object^ sender, Org::Mule::Api::Routing::MessageEventArgs^ args)
+	{
+		Console::WriteLine(args->Message);
+	}
+	static Org::Mule::Api::Routing::Router^ router;
+
+	static void init()
+	{
+		router = gcnew Org::Mule::Api::Routing::Router();
+		router->OnLog += gcnew System::EventHandler<Org::Mule::Api::Routing::MessageEventArgs ^>(&GlobalObjects::OnOnLog);
+	}
+	static void OnOnLog(System::Object ^sender, Org::Mule::Api::Routing::MessageEventArgs ^e);
 };
 
 static JniManager* jniManager;
@@ -88,6 +104,11 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
 
 		AppDomain^ currentDomain = AppDomain::CurrentDomain;
 		currentDomain->AssemblyResolve += gcnew ResolveEventHandler(AssemblyResolver::MyResolveEventHandler);
+
+		GlobalObjects::init();
+		//Org::Mule::Api::Routing::Router^ r = GlobalObjects::router;
+
+		//GlobalObjects::router->OnLog += gcnew System::EventHandler<Org::Mule::Api::Routing::MessageEventArgs ^>(GlobalObjects::MyLoggerEvent);
 	}
 	catch (Exception^ ex)
 	{
@@ -102,129 +123,21 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
 JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *vm, void *reserved)
 {
 	Console::WriteLine("JNI_OnUnload called.");
+
+	//TODO REMOVE javaRouter globalreference
 	//remove global references
 	jniManager->cleanup();
 }
 
-//JNIEXPORT jobject JNICALL Java_jni_Router_ExecuteMethod
-//(JNIEnv * env, jobject obj, jstring assemblyPath, jstring assemblyType, jstring methodName)
-//{
-//	String^ path = jniManager->toString(assemblyPath);
-//	String^ type = jniManager->toString(assemblyType);
-//	String^ method = jniManager->toString(methodName);
-//
-//	//System::Console::WriteLine("Parameters:");
-//	//System::Console::WriteLine(path);
-//	//System::Console::WriteLine(type);
-//	//System::Console::WriteLine(method);
-//
-//	try
-//	{
-//		Assembly^ myAss = Assembly::LoadFrom("C:\\Users\\nico\\Documents\\visual studio 2013\\Projects\\Router\\RouterSharp\\bin\\Debug\\RouterSharp.dll");
-//		Type^ myType = myAss->GetType("RouterSharp.Router");
-//
-//		MethodInfo^ myMethod = myType->GetMethod("ExecuteMethod");
-//		Object^ instance = Activator::CreateInstance(myType);
-//		array< Object^ >^ local = gcnew array< Object^ >(3);
-//		local[0] = path;
-//		local[1] = type;
-//		local[2] = method;
-//		Object^ result = myMethod->Invoke(instance, local);
-//		//System::Console::WriteLine(result->ToString());
-//
-//		jobject responseInstance = jniManager->toResponseObject(result->ToString());
-//
-//		return responseInstance;
-//	}
-//	catch (Exception^ ex)
-//	{
-//		System::Console::WriteLine(ex->Message);
-//	}
-//
-//	return env->NewStringUTF("something failed");
-//}
+static jobject javaRouter;
+JNIEXPORT void JNICALL Java_jni_Router_Init
+(JNIEnv *env, jobject obj)
+{
+	jniManager->setRouter(obj);
+}
 
-//JNIEXPORT jint JNICALL Java_jni_Router_GetInt
-//(JNIEnv * env, jobject obj)
-//{
-//	Assembly^ myAss = Assembly::LoadFrom("C:\\Users\\nico\\Documents\\visual studio 2013\\Projects\\Router\\RouterSharp\\bin\\Debug\\RouterSharp.dll");
-//	Type^ myType = myAss->GetType("RouterSharp.Router");
-//
-//	MethodInfo^ myMethod = myType->GetMethod("ReturnInt");
-//	Object^ instance = Activator::CreateInstance(myType);
-//
-//	Object^ result = myMethod->Invoke(instance, nullptr);
-//
-//	return (int)result;
-//}
-//
-//JNIEXPORT jdouble JNICALL Java_jni_Router_GetDouble
-//(JNIEnv * env, jobject obj)
-//{
-//	Assembly^ myAss = Assembly::LoadFrom("C:\\Users\\nico\\Documents\\visual studio 2013\\Projects\\Router\\RouterSharp\\bin\\Debug\\RouterSharp.dll");
-//	Type^ myType = myAss->GetType("RouterSharp.Router");
-//
-//	MethodInfo^ myMethod = myType->GetMethod("ReturnDouble");
-//	Object^ instance = Activator::CreateInstance(myType);
-//
-//	Object^ result = myMethod->Invoke(instance, nullptr);
-//
-//	return (double)result;
-//}
-//
-//JNIEXPORT jboolean JNICALL Java_jni_Router_GetBoolean
-//(JNIEnv * env, jobject obj)
-//{
-//	Assembly^ myAss = Assembly::LoadFrom("C:\\Users\\nico\\Documents\\visual studio 2013\\Projects\\Router\\RouterSharp\\bin\\Debug\\RouterSharp.dll");
-//	Type^ myType = myAss->GetType("RouterSharp.Router");
-//
-//	MethodInfo^ myMethod = myType->GetMethod("ReturnBoolean");
-//	Object^ instance = Activator::CreateInstance(myType);
-//
-//	Object^ result = myMethod->Invoke(instance, nullptr);
-//
-//	return (bool)result;
-//}
-//
-//JNIEXPORT jintArray JNICALL Java_jni_Router_PassArray
-//(JNIEnv * env, jobject obj, jintArray ints, jbyteArray bytes, jobjectArray strings)
-//{
-//	try
-//	{
-//		array<int>^ intArray = jniManager->toIntArray(ints);
-//
-//		Assembly^ myAss = Assembly::LoadFrom("C:\\Users\\nico\\Documents\\visual studio 2013\\Projects\\Router\\RouterSharp\\bin\\Debug\\RouterSharp.dll");
-//		Type^ myType = myAss->GetType("RouterSharp.Router");
-//
-//		MethodInfo^ myMethod = myType->GetMethod("ExecuteIntArray");
-//		Object^ instance = Activator::CreateInstance(myType);
-//
-//		array<Object^>^ local = gcnew array<Object^>(1);
-//		local[0] = intArray;
-//
-//		Object^ result = myMethod->Invoke(instance, local);
-//
-//		System::Array^ arr = (System::Array^)result;
-//
-//		int intsSize = intArray->Length;
-//
-//		jint *tempArray = new jint[intsSize];
-//
-//		jintArray jArray = env->NewIntArray(intsSize);
-//
-//		for (int i = 0; i < arr->Length; i++)
-//		{
-//			int toC = (int)arr->GetValue(i);
-//			tempArray[i] = toC;
-//		}
-//
-//		//copy
-//		env->SetIntArrayRegion(jArray, 0, intsSize, tempArray);
-//
-//		return jArray;
-//	}
-//	catch (Exception^ ex)
-//	{
-//		System::Console::WriteLine(ex->Message);
-//	}
-//}
+void GlobalObjects::OnOnLog(System::Object ^sender, Org::Mule::Api::Routing::MessageEventArgs ^e)
+{
+	jniManager->log(e->Message);
+}
+

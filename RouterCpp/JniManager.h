@@ -28,8 +28,9 @@ private:
 	jmethodID getInboundProperties;
 	jmethodID responseCtor;
 	jmethodID setPayloadMethod;
+	jmethodID logMethod;
 	jclass responseClazz;
-
+	jobject routerInstance;
 public:
 
 	JniManager(JavaVM*);
@@ -41,5 +42,6 @@ public:
 	Org::Mule::Api::Routing::ProcessRequest^ toProcessRequest(jobject);
 	jobject toResponseObject(String^);
 	void cleanup();
-
+	void log(String^);
+	void setRouter(jobject);
 };
