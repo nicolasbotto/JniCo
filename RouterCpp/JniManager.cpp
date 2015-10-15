@@ -10,7 +10,7 @@
 JniManager::JniManager(JavaVM* vm)
 {
 	assert(vm);
-	env = nullptr;
+	//env = nullptr;
 	jvm = vm;
 	init();
 }
@@ -19,7 +19,10 @@ void JniManager::init()
 {
 	JNIEnv* env = getEnv();
 
-	typeConverter = new TypeConverter(env);
+	assert(env);
+
+	typeConverter = new TypeConverter();
+	typeConverter->init(env);
 
 	// jni/Router
 	jclass routerClazzTmp = env->FindClass("jni/Router");
@@ -159,11 +162,19 @@ void JniManager::init()
 
 void JniManager::setRouter(jobject obj)
 {
+	JNIEnv* env = getEnv();
+
+	assert(env);
+
 	routerInstance = env->NewGlobalRef(obj);
 }
 
 void JniManager::log(String^ message)
 {
+	JNIEnv* env = getEnv();
+
+	assert(env);
+
 	msclr::interop::marshal_context ctx;
 	const char* c_message = ctx.marshal_as<const char*>(message);
 
@@ -176,6 +187,8 @@ void JniManager::log(String^ message)
 
 void JniManager::setJVM(JavaVM* java)
 {
+	assert(java);
+
 	jvm = java;
 	init();
 }
@@ -187,33 +200,43 @@ JavaVM* JniManager::getJVM()
 
 JNIEnv* JniManager::getEnv()
 {
-	if (env == nullptr)
-	{
+	String^ name = Threading::Thread::CurrentThread->Name;
+	JNIEnv *env;
+	/*if (env == nullptr)
+	{*/
 		assert(jvm);
-		if (jvm->GetEnv((void**)&env, JNI_VERSION_1_6) != JNI_OK)
+		int envStatus = jvm->GetEnv((void**)&env, JNI_VERSION_1_6);
+		if (envStatus == JNI_OK)
 		{
-			return nullptr;
+			int attached = jvm->AttachCurrentThread((void**)&env, NULL);
+
+			return env;
 		}
 
-		//jvm->AttachCurrentThread((void**)env, nullptr);
-	}
-	assert(env);
-	return env;
+		/*if (envStatus == JNI_EDETACHED) 
+		{
+			jvm->AttachCurrentThread((void**)env, NULL);
+			return env;
+		}*/
+	//}
+	/*assert(env);
+	return env;*/
+
+		return NULL;
 }
 
 void JniManager::cleanup()
 {
-	if (!env)
-	{
-		env = getEnv();
-	}
+	JNIEnv* env = getEnv();
+
+	assert(env);
 
 	try
 	{
 		env->DeleteGlobalRef(responseClazz);
 		env->DeleteGlobalRef(routerInstance);
 
-		typeConverter->cleanup();
+		typeConverter->cleanup(env);
 
 		/*if (env->ExceptionCheck())
 		{
@@ -231,24 +254,28 @@ Org::Mule::Api::Routing::ProcessRequest^ JniManager::toProcessRequest(jobject ob
 {
 	Org::Mule::Api::Routing::ProcessRequest^ request = gcnew Org::Mule::Api::Routing::ProcessRequest();
 
-	request->AssemblyName = typeConverter->convertToC<String^>(env->CallObjectMethod(obj, getAssemblyName, "()Ljava/lang/String;"));
-	request->AssemblyPath = typeConverter->convertToC<String^>(env->CallObjectMethod(obj, getAssemblyPath, "()Ljava/lang/String;"));
-	request->MethodName = typeConverter->convertToC<String^>(env->CallObjectMethod(obj, getMethodName, "()Ljava/lang/String;"));
+	JNIEnv* env = getEnv();
+
+	request->AssemblyName = typeConverter->convertToC<String^>(env, env->CallObjectMethod(obj, getAssemblyName, "()Ljava/lang/String;"));
+	request->AssemblyPath = typeConverter->convertToC<String^>(env, env->CallObjectMethod(obj, getAssemblyPath, "()Ljava/lang/String;"));
+	request->MethodName = typeConverter->convertToC<String^>(env, env->CallObjectMethod(obj, getMethodName, "()Ljava/lang/String;"));
 	request->FullTrust = env->CallBooleanMethod(obj, getFullTrust);
 	request->IsSingleton = env->CallBooleanMethod(obj, getIsSingleton);
 	request->Log = env->CallBooleanMethod(obj, getLog);
 	request->NotifyEvents = env->CallBooleanMethod(obj, getNotifyEvents);
-	request->MethodArguments = typeConverter->convertToC<Dictionary<String^, Object^>^>(env->CallObjectMethod(obj, getMethodArguments));
-	request->InboundProperties = typeConverter->convertToC<Dictionary<String^, Object^>^>(env->CallObjectMethod(obj, getInboundProperties));
-	request->InvocationProperties = typeConverter->convertToC<Dictionary<String^, Object^>^>(env->CallObjectMethod(obj, getInvocationProperties));
-	request->OutboundProperties = typeConverter->convertToC<Dictionary<String^, Object^>^>(env->CallObjectMethod(obj, getOutboundProperties));
-	request->SessionProperties = typeConverter->convertToC<Dictionary<String^, Object^>^>(env->CallObjectMethod(obj, getSessionProperties));
+	request->MethodArguments = typeConverter->convertToC<Dictionary<String^, Object^>^>(env, env->CallObjectMethod(obj, getMethodArguments));
+	request->InboundProperties = typeConverter->convertToC<Dictionary<String^, Object^>^>(env, env->CallObjectMethod(obj, getInboundProperties));
+	request->InvocationProperties = typeConverter->convertToC<Dictionary<String^, Object^>^>(env, env->CallObjectMethod(obj, getInvocationProperties));
+	request->OutboundProperties = typeConverter->convertToC<Dictionary<String^, Object^>^>(env, env->CallObjectMethod(obj, getOutboundProperties));
+	request->SessionProperties = typeConverter->convertToC<Dictionary<String^, Object^>^>(env, env->CallObjectMethod(obj, getSessionProperties));
 
 	return request;
 }
 
 jobject JniManager::toResponseObject(String^ payload)
 {
+	JNIEnv* env = getEnv();
+
 	msclr::interop::marshal_context ctx;
 	const char* convertedPayload = ctx.marshal_as<const char*>(payload);
 

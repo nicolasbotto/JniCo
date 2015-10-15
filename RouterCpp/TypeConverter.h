@@ -9,7 +9,6 @@ using namespace System::Collections::Generic;
 class TypeConverter
 {
 private:
-	JNIEnv *env;
 	jmethodID doubleValue;
 	jmethodID intValue;
 	jmethodID charValue;
@@ -27,11 +26,11 @@ private:
 	jclass setClazz;
 
 public:
-	TypeConverter(JNIEnv*);
+	void init(JNIEnv*);
 	
 	// conversion functions
 	template<typename TOut>
-	TOut convertToC(jobject);
-	Object^ toManagedObject(jobject);
-	void cleanup();
+	TOut convertToC(JNIEnv*, jobject);
+	Object^ toManagedObject(JNIEnv*, jobject);
+	void cleanup(JNIEnv*);
 };

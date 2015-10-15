@@ -13,7 +13,6 @@ class JniManager
 private:
 	TypeConverter* typeConverter;
 	JavaVM* jvm;
-	JNIEnv* env;
 	jmethodID getAssemblyName;
 	jmethodID getAssemblyPath;
 	jmethodID getMethodName;
