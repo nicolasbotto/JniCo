@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <properties>
+      <bridge.name></bridge.name>
+      <bridge.version></bridge.version>
+    </properties>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.mule.api.jni</groupId>
+    <!--<artifactId>${bridge.name}.j</artifactId>
+    <version>${bridge.version}</version>-->
+    <artifactId>jniBridge</artifactId>
+    <version>1.0.0.0</version>
+    <name>JniBridge</name>
+	
+	<repositories>
+        <repository>
+            <id>mulesoft-releases</id>
+            <name>MuleSoft Releases Repository</name>
+            <url>http://repository.mulesoft.org/releases/</url>
+            <layout>default</layout>
+        </repository>
+    </repositories>
+	
+	<dependencies>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.16</version>
+    </dependency>
+    
+  </dependencies>
+</project>

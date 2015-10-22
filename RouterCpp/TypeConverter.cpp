@@ -7,44 +7,44 @@ void TypeConverter::init(JNIEnv* env)
 {
 	assert(env);
 
-	jclass intClazz = env->FindClass("Ljava/lang/Integer;");
+	jclass intClazz = env->FindClass("java/lang/Integer");
 	intValue = env->GetMethodID(intClazz, "intValue", "()I");
 	env->DeleteLocalRef(intClazz);
 
-	jclass doubleClazz = env->FindClass("Ljava/lang/Double;");
+	jclass doubleClazz = env->FindClass("java/lang/Double");
 	doubleValue = env->GetMethodID(doubleClazz, "doubleValue", "()D");
 	env->DeleteLocalRef(doubleClazz);
 
-	jclass charClazz = env->FindClass("Ljava/lang/Character;");
+	jclass charClazz = env->FindClass("java/lang/Character");
 	charValue = env->GetMethodID(charClazz, "charValue", "()C");
 	env->DeleteLocalRef(charClazz);
 
-	jclass longClazz = env->FindClass("Ljava/lang/Long;");
+	jclass longClazz = env->FindClass("java/lang/Long");
 	longValue = env->GetMethodID(longClazz, "longValue", "()J");
 	env->DeleteLocalRef(longClazz);
 
-	jclass booleanClazz = env->FindClass("Ljava/lang/Boolean;");
+	jclass booleanClazz = env->FindClass("java/lang/Boolean");
 	booleanValue = env->GetMethodID(booleanClazz, "booleanValue", "()Z");
 	env->DeleteLocalRef(booleanClazz);
 
-	jclass byteClazz = env->FindClass("Ljava/lang/Byte;");
+	jclass byteClazz = env->FindClass("java/lang/Byte");
 	byteValue = env->GetMethodID(byteClazz, "byteValue", "()B");
 	env->DeleteLocalRef(byteClazz);
 
-	jclass shortClazz = env->FindClass("Ljava/lang/Short;");
+	jclass shortClazz = env->FindClass("java/lang/Short");
 	shortValue = env->GetMethodID(shortClazz, "shortValue", "()S");
 	env->DeleteLocalRef(shortClazz);
 
-	jclass floatClazz = env->FindClass("Ljava/lang/Float;");
+	jclass floatClazz = env->FindClass("java/lang/Float");
 	floatValue = env->GetMethodID(floatClazz, "floatValue", "()F");
 	env->DeleteLocalRef(floatClazz);
 
-	jclass clazz = env->FindClass("Ljava/lang/Class;");
+	jclass clazz = env->FindClass("java/lang/Class");
 	getClassName = env->GetMethodID(clazz, "getName", "()Ljava/lang/String;");
 	env->DeleteLocalRef(clazz);
 
 	// java/util/Map
-	jclass mapClazzTmp = env->FindClass("Ljava/util/Map;");
+	jclass mapClazzTmp = env->FindClass("java/util/Map");
 
 	if (mapClazzTmp == NULL)
 	{
@@ -78,7 +78,7 @@ void TypeConverter::init(JNIEnv* env)
 	}
 
 	// java/util/Set
-	jclass setClazzTmp = env->FindClass("Ljava/util/Set;");
+	jclass setClazzTmp = env->FindClass("java/util/Set");
 
 	if (setClazzTmp == NULL)
 	{
@@ -112,7 +112,7 @@ template<>
 String^ TypeConverter::convertToC(JNIEnv* env, jobject obj)
 {
 	assert(env);
-	//return gcnew String(convertToC<const char*>(obj));
+
 	jstring input = (jstring)obj;
 	if (input == NULL)
 	{

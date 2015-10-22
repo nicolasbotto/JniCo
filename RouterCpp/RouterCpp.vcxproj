@@ -171,11 +171,6 @@
   <ItemGroup>
     <Image Include="app.ico" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\RouterSDK\RouterSDK.csproj">
-      <Project>{62d93cdb-9dc2-4d8d-93f6-d4d457487917}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -24,140 +24,100 @@ void JniManager::init()
 	typeConverter = new TypeConverter();
 	typeConverter->init(env);
 
+	// Exception class
+	jclass exceptionClazzTemp = env->FindClass("java/lang/Exception");
+
+	if (exceptionClazzTemp == NULL)
+	{
+		Console::WriteLine("Cannot find class java/lang/Exception");
+		
+		checkJniException();
+	}
+
+	exceptionClazz = (jclass)env->NewGlobalRef(exceptionClazzTemp);
+
+	env->DeleteLocalRef(exceptionClazzTemp);
+
 	// jni/Router
 	jclass routerClazzTmp = env->FindClass("jni/Router");
 
-	if (routerClazzTmp == NULL)
-	{
-		Console::WriteLine("Cannot find class jni/Router");
-	}
+	checkJniException();
 
 	logMethod = env->GetMethodID(routerClazzTmp, "log", "(Ljava/lang/String;)V");
 
-	if (logMethod == NULL)
-	{
-		Console::WriteLine("Cannot find class jni/Router method log");
-	}
+	checkJniException();
 
 	env->DeleteLocalRef(routerClazzTmp);
 
 	// jni/Response
 	jclass responseClazzTmp = env->FindClass("jni/Response");
 
-	if (responseClazzTmp == NULL)
-	{
-		Console::WriteLine("Cannot find class jni/Response");
-	}
+	checkJniException();
 
 	responseClazz = (jclass)env->NewGlobalRef(responseClazzTmp);
 	env->DeleteLocalRef(responseClazzTmp);
 
 	responseCtor = env->GetMethodID(responseClazz, "<init>", "()V");
 
-	if (responseCtor == NULL)
-	{
-		Console::WriteLine("Cannot find class jni/Response ctor");
-	}
+	checkJniException();
 
 	setPayloadMethod = env->GetMethodID(responseClazz, "setPayload", "(Ljava/lang/String;)V");
 
-	if (setPayloadMethod == NULL)
-	{
-		Console::WriteLine("Cannot find class jni/Response setPayload method");
-	}
+	checkJniException();
 
 	// jni/Request
 
 	jclass processRequestClazz = env->FindClass("jni/Request");
 
-	if (processRequestClazz == NULL)
-	{
-		Console::WriteLine("Cannot find class jni/Request");
-	}
+	checkJniException();
 
 	getAssemblyName = env->GetMethodID(processRequestClazz, "getAssemblyName", "()Ljava/lang/String;");
 
-	if (getAssemblyName == NULL)
-	{
-		Console::WriteLine("Cannot find class jni/Request getAssemblyName method");
-	}
+	checkJniException();
 
 	getAssemblyPath = env->GetMethodID(processRequestClazz, "getAssemblyPath", "()Ljava/lang/String;");
 
-	if (getAssemblyPath == NULL)
-	{
-		Console::WriteLine("Cannot find class jni/Request getAssemblyPath method");
-	}
+	checkJniException();
 
 	getMethodName = env->GetMethodID(processRequestClazz, "getMethodName", "()Ljava/lang/String;");
 
-	if (getMethodName == NULL)
-	{
-		Console::WriteLine("Cannot find class jni/Request getMethodName method");
-	}
+	checkJniException();
 
 	getLog = env->GetMethodID(processRequestClazz, "getLog", "()Z");
 
-	if (getLog == NULL)
-	{
-		Console::WriteLine("Cannot find class jni/Request getLog method");
-	}
+	checkJniException();
 
 	getNotifyEvents = env->GetMethodID(processRequestClazz, "getNotifyEvents", "()Z");
 
-	if (getNotifyEvents == NULL)
-	{
-		Console::WriteLine("Cannot find class jni/Request getNotifyEvents method");
-	}
+	checkJniException();
 
 	getFullTrust = env->GetMethodID(processRequestClazz, "getFullTrust", "()Z");
 
-	if (getFullTrust == NULL)
-	{
-		Console::WriteLine("Cannot find class jni/Request getFullTrust method");
-	}
+	checkJniException();
 
 	getIsSingleton = env->GetMethodID(processRequestClazz, "getIsSingleton", "()Z");
 
-	if (getIsSingleton == NULL)
-	{
-		Console::WriteLine("Cannot find class jni/Request getIsSingleton method");
-	}
+	checkJniException();
 
 	getInboundProperties = env->GetMethodID(processRequestClazz, "getInboundProperties", "()Ljava/util/Map;");
 
-	if (getInboundProperties == NULL)
-	{
-		Console::WriteLine("Cannot find class jni/Request getInboundProperties method");
-	}
+	checkJniException();
 
 	getMethodArguments = env->GetMethodID(processRequestClazz, "getMethodArguments", "()Ljava/util/Map;");
 
-	if (getMethodArguments == NULL)
-	{
-		Console::WriteLine("Cannot find class jni/Request getMethodArguments method");
-	}
+	checkJniException();
 
 	getInvocationProperties = env->GetMethodID(processRequestClazz, "getInvocationProperties", "()Ljava/util/Map;");
 
-	if (getInvocationProperties == NULL)
-	{
-		Console::WriteLine("Cannot find class jni/Request getInvocationProperties method");
-	}
+	checkJniException();
 
 	getSessionProperties = env->GetMethodID(processRequestClazz, "getSessionProperties", "()Ljava/util/Map;");
 
-	if (getSessionProperties == NULL)
-	{
-		Console::WriteLine("Cannot find class jni/Request getSessionProperties method");
-	}
+	checkJniException();
 
 	getOutboundProperties = env->GetMethodID(processRequestClazz, "getOutboundProperties", "()Ljava/util/Map;");
 
-	if (getOutboundProperties == NULL)
-	{
-		Console::WriteLine("Cannot find class jni/Request getOutboundProperties method");
-	}
+	checkJniException();
 }
 
 void JniManager::setRouter(jobject obj)
@@ -200,29 +160,17 @@ JavaVM* JniManager::getJVM()
 
 JNIEnv* JniManager::getEnv()
 {
-	String^ name = Threading::Thread::CurrentThread->Name;
 	JNIEnv *env;
-	/*if (env == nullptr)
-	{*/
-		assert(jvm);
-		int envStatus = jvm->GetEnv((void**)&env, JNI_VERSION_1_6);
-		if (envStatus == JNI_OK)
-		{
-			int attached = jvm->AttachCurrentThread((void**)&env, NULL);
+	assert(jvm);
+	int envStatus = jvm->GetEnv((void**)&env, JNI_VERSION_1_6);
 
-			return env;
-		}
+	if (envStatus == JNI_OK)
+	{
+		jvm->AttachCurrentThread((void**)&env, NULL);
+		return env;
+	}
 
-		/*if (envStatus == JNI_EDETACHED) 
-		{
-			jvm->AttachCurrentThread((void**)env, NULL);
-			return env;
-		}*/
-	//}
-	/*assert(env);
-	return env;*/
-
-		return NULL;
+	return NULL;
 }
 
 void JniManager::cleanup()
@@ -245,7 +193,7 @@ void JniManager::cleanup()
 	}
 	catch (Exception^ ex)
 	{
-		Console::WriteLine(ex->Message);
+		throwException(ex->Message);
 	}
 	
 }
@@ -276,6 +224,8 @@ jobject JniManager::toResponseObject(String^ payload)
 {
 	JNIEnv* env = getEnv();
 
+	assert(env);
+
 	msclr::interop::marshal_context ctx;
 	const char* convertedPayload = ctx.marshal_as<const char*>(payload);
 
@@ -288,4 +238,29 @@ jobject JniManager::toResponseObject(String^ payload)
 	env->DeleteLocalRef(jPayload);
 
 	return response;
+}
+
+void JniManager::throwException(String^ message)
+{
+	JNIEnv* env = getEnv();
+	assert(env);
+
+	msclr::interop::marshal_context ctx;
+	const char* convertedMessage = ctx.marshal_as<const char*>(message);
+
+	env->ThrowNew(exceptionClazz, convertedMessage);
+}
+
+void JniManager::checkJniException()
+{
+	JNIEnv* env = getEnv();
+	assert(env);
+
+	jthrowable error = env->ExceptionOccurred();
+
+	if (error)
+	{
+		env->ExceptionDescribe();
+		env->ExceptionClear();
+	}
 }

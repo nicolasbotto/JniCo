@@ -101,27 +101,16 @@ JNIEXPORT jobject JNICALL Java_jni_Router_InvokeNetMethod
 	{
 		Org::Mule::Api::Routing::ProcessRequest^ processRequest = jniManager->toProcessRequest(request);
 
-		try
-		{
-			Org::Mule::Api::Routing::ProcessRequest^ result = (Org::Mule::Api::Routing::ProcessRequest^)GlobalObjects::router->Process(processRequest);
+		Org::Mule::Api::Routing::ProcessRequest^ result = (Org::Mule::Api::Routing::ProcessRequest^)GlobalObjects::router->Process(processRequest);
 
-			jobject responseInstance = jniManager->toResponseObject(result->Result->ToString());
-
-			return responseInstance;
-		}
-		catch (Exception^ ex)
-		{
-			System::Console::WriteLine(ex->Message);
-		}
-
-		jobject responseInstance = jniManager->toResponseObject(processRequest->AssemblyName);
+		jobject responseInstance = jniManager->toResponseObject(result->Result->ToString());
 
 		return responseInstance;
-
 	}
 	catch (Exception^ ex)
 	{
-		System::Console::WriteLine(ex->Message);
+		//System::Console::WriteLine(ex->Message);
+		jniManager->throwException(ex->Message);
 	}
 }
 

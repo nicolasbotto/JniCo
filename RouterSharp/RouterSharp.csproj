@@ -47,12 +47,6 @@
     <Compile Include="Router.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\RouterSDK\RouterSDK.csproj">
-      <Project>{62d93cdb-9dc2-4d8d-93f6-d4d457487917}</Project>
-      <Name>RouterSDK</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

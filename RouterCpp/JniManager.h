@@ -30,6 +30,8 @@ private:
 	jmethodID logMethod;
 	jclass responseClazz;
 	jobject routerInstance;
+	jclass exceptionClazz;
+
 public:
 
 	JniManager(JavaVM*);
@@ -43,4 +45,6 @@ public:
 	void cleanup();
 	void log(String^);
 	void setRouter(jobject);
+	void throwException(String^);
+	void checkJniException();
 };
