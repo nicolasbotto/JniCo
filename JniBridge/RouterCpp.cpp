@@ -93,6 +93,18 @@ JNIEXPORT void JNICALL Java_org_mule_api_jni_Bridge_init
 (JNIEnv *env, jobject obj)
 {
 	jniManager->setRouter(obj);
+
+	jclass managerClazz = env->FindClass("Manager");
+
+	jmethodID m = env->GetMethodID(managerClazz, "GetPerson", "(I)LPerson;");
+
+	JNINativeMethod nm[] = {
+			{ "GetPerson", "(I)LPerson;", m }
+	};
+
+	jint foo = env->RegisterNatives(managerClazz, nm, sizeof(nm));
+	if (foo == 0)
+		printf("returned ZERO...all is OK\n");
 }
 
 JNIEXPORT jobject JNICALL Java_org_mule_api_jni_Bridge_invokeNetMethod

@@ -1,0 +1,9 @@
+g++ `pkg-config --cflags --libs mono-2` -fPIC -c TypeConverter.c JniManager.c RouterCpp.c -I /usr/lib/jvm/java-1.7.0-openjdk-amd64/include
+g++ `pkg-config --cflags --libs mono-2` TypeConverter.o JniManager.o RouterCpp.o -o JniBridge.so --shared -I /usr/lib/jvm/java-1.7.0-openjdk-amd64/include -lmono-2.0 -L /usr/lib/jvm/java-7-openjdk-amd64/jre/lib/amd64/server -ljsig -ljvm
+
+
+-march=x86-64
+/home/test/AnypointStudio/workspace/.mule/tmp/test/plugins/dotnet-connector-2.3.2/lib/JniBridge.so
+
+
+java -cp .:/home/test/.m2/repository/com/sun/jersey/jersey-client/1.8/jersey-client-1.8.jar:/home/test/.m2/repository/com/sun/jersey/jersey-core/1.8/jersey-core-1.8.jar org.nico.test.App

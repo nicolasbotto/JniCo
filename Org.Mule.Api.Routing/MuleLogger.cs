@@ -26,6 +26,7 @@ namespace Org.Mule.Api.Routing
 
         public void Write(string message, LoggerLevel level)
         {
+            this.log(message);
             //switch (level)
             //{
             //    case LoggerLevel.Debug:
@@ -46,6 +47,7 @@ namespace Org.Mule.Api.Routing
 
         public void Write(string format, LoggerLevel level, params object[] args)
         {
+            this.log(string.Format(CultureInfo.InvariantCulture, format, args));
             //switch (level)
             //{
             //    case LoggerLevel.Debug:

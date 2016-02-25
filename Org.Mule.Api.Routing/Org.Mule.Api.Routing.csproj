@@ -48,7 +48,6 @@
     <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Jni\JniHelper.cs" />
     <Compile Include="MuleInstrumentation.cs" />
     <Compile Include="MuleLogger.cs" />
     <Compile Include="ProcessRequest.cs" />

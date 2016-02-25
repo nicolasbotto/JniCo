@@ -14,6 +14,12 @@ namespace Org.Mule.Api.Routing
         public string Message { get; set; }
     }
 
+    public class InstrumentationEventArgs : EventArgs
+    {
+        public string Message { get; set; }
+        public int Id { get; set; }
+    }
+
     public class Router
     {
         private ComponentManager componentManager;
@@ -21,6 +27,7 @@ namespace Org.Mule.Api.Routing
         private ConcurrentDictionary<string, ComponentManager> appDomains;
         private MuleLogger logger;
         public event EventHandler<MessageEventArgs> OnLog;
+        public event EventHandler<InstrumentationEventArgs> OnInstrument;
 
         public Router()
         {
@@ -45,6 +52,21 @@ namespace Org.Mule.Api.Routing
             DoOnLog(message);
         }
 
+        private void DoOnInstrument(string message, int id)
+        {
+            EventHandler<InstrumentationEventArgs> handler = OnInstrument;
+            if (handler != null)
+            {
+                var args = new InstrumentationEventArgs() { Message = message, Id = id };
+                handler(this, args);
+            }
+        }
+
+        public void Instrument(string message, int id)
+        {
+            DoOnInstrument(message, id);
+        }
+
         public object Process(ProcessRequest request)
         {
             var assembly = string.Empty;
@@ -54,7 +76,7 @@ namespace Org.Mule.Api.Routing
 
             MuleMessage result;
             MuleMessage muleMessage = new MuleMessage();
-            IMuleInstrumentation instrumentation = new MuleInstrumentation(new Notification(), request.NotifyEvents);
+            IMuleInstrumentation instrumentation = new MuleInstrumentation(Instrument, request.NotifyEvents);
 
             if (string.IsNullOrWhiteSpace(request.AssemblyName))
             {
